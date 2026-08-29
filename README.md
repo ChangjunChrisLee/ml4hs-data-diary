@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ML4HS Data Diary
 
-## Getting Started
+Student data-collection app for **ML for Understanding Humans and Society (SKKU, Fall 2026)**.
 
-First, run the development server:
+Students complete a profile survey, record daily life and media-use data, review personal charts, configure personal probes, and collaborate in teams. Instructors can monitor participation, post announcements, assign teams, and export anonymized diary data.
 
-```bash
+## Stack
+
+- Next.js 16 / React 19 / TypeScript
+- Supabase Authentication and PostgreSQL
+- Tailwind CSS and Recharts
+
+## Local development
+
+Node.js LTS is required.
+
+```powershell
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create `.env.local` with:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```dotenv
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Never commit `.env.local`. If this project is stored in a Google Drive synchronized folder and `npm ci` reports `EBADF` or `EPERM`, run the app from a local nonsynchronized checkout.
 
-## Learn More
+## Supabase setup
 
-To learn more about Next.js, take a look at the following resources:
+Run the SQL files in the Supabase SQL Editor in this order:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. `supabase-schema.sql`
+2. `supabase-schema-teams.sql`
+3. `supabase-schema-admin.sql`
+4. `supabase-schema-v2.sql`
+5. `supabase-schema-v2b.sql`
+6. `supabase-schema-v3.sql`
+7. `supabase-schema-v4.sql`
+8. `supabase-schema-v5.sql`
+9. `supabase-schema-v6.sql`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The final migration also adds the profile-update RLS policy required by the survey and personal probes, restricts students to one team, limits teams to five students, and prevents forged team creators. Re-run `supabase-schema-v6.sql` if an existing project was initialized before these deployment-hardening statements were added.
 
-## Deploy on Vercel
+After creating the instructor account, grant admin access manually in the SQL Editor:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sql
+update public.profiles
+set is_admin = true
+where id = '<instructor-auth-user-id>';
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Verification
+
+```powershell
+npm run lint
+npm run build
+```
+
+Both commands must pass before deployment.
+
+## Deployment
+
+Deploy the project root to a Next.js-compatible host such as Vercel and configure the two Supabase environment variables there. In Supabase Authentication, add the production URL to the allowed redirect URLs before distributing the app to students.
+
+Before release, test these flows with separate instructor and student accounts:
+
+- sign-up, email confirmation, sign-in, and sign-out
+- profile survey save and edit
+- new daily log and same-date edit
+- dashboard totals and charts
+- team create, join, leave, charter, and posts
+- instructor announcements, team assignment, and CSV export
