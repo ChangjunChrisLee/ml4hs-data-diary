@@ -17,6 +17,7 @@ export default function LoginForm() {
   const [message, setMessage] = useState('')
   const [isError, setIsError] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [resending, setResending] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -26,7 +27,11 @@ export default function LoginForm() {
     const supabase = createClient()
 
     if (isSignUp) {
-      const { error } = await supabase.auth.signUp({ email, password })
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: `${window.location.origin}/login` },
+      })
       if (error) {
         setIsError(true)
         setMessage(error.message)
@@ -46,6 +51,34 @@ export default function LoginForm() {
     }
 
     setLoading(false)
+  }
+
+  async function handleResend() {
+    const normalizedEmail = email.trim()
+    if (!normalizedEmail) {
+      setIsError(true)
+      setMessage('Enter your email address first.')
+      return
+    }
+
+    setResending(true)
+    setMessage('')
+
+    const supabase = createClient()
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: normalizedEmail,
+      options: { emailRedirectTo: `${window.location.origin}/login` },
+    })
+
+    setResending(false)
+    if (error) {
+      setIsError(true)
+      setMessage(error.message)
+    } else {
+      setIsError(false)
+      setMessage('Confirmation email sent. Please check your inbox and spam folder.')
+    }
   }
 
   return (
@@ -98,6 +131,15 @@ export default function LoginForm() {
               className="w-full text-sm text-gray-500 hover:text-gray-800 transition-colors"
             >
               {isSignUp ? 'Already have an account? → Sign In' : 'New here? → Sign Up'}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending || loading}
+              className="w-full text-sm text-blue-600 hover:text-blue-700 transition-colors disabled:opacity-50"
+            >
+              {resending ? 'Sending confirmation email...' : 'Resend confirmation email'}
             </button>
           </form>
         </CardContent>
