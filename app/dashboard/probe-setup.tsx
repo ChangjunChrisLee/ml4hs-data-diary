@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useLanguage } from '@/components/language-provider'
+import { localizeError } from '@/lib/i18n'
 
 const PROBE_KEYS = [
   'probe_label_1', 'probe_label_2', 'probe_label_3', 'probe_label_4', 'probe_label_5',
@@ -21,6 +23,7 @@ const EXAMPLES = [
 type ProbeSlot = { label: string; editing: boolean; input: string }
 
 export default function ProbeSetup({ initial }: { initial: (string | null)[] }) {
+  const { locale, t } = useLanguage()
   const [slots, setSlots] = useState<ProbeSlot[]>(
     initial.map(l => ({ label: l ?? '', editing: false, input: l ?? '' }))
   )
@@ -59,7 +62,7 @@ export default function ProbeSetup({ initial }: { initial: (string | null)[] }) 
       .eq('id', user.id)
 
     if (error) {
-      setErrors(prev => prev.map((e, idx) => idx === i ? error.message : e))
+      setErrors(prev => prev.map((e, idx) => idx === i ? localizeError(locale, error.message, '저장하지 못했습니다. 다시 시도해주세요.') : e))
     } else {
       setSlots(prev => prev.map((s, idx) =>
         idx === i ? { label: val, editing: false, input: val } : s
@@ -72,7 +75,7 @@ export default function ProbeSetup({ initial }: { initial: (string | null)[] }) 
     <Card className="border-purple-200">
       <CardHeader className="pb-2 pt-4">
         <CardTitle className="text-xs text-purple-500 uppercase tracking-wide">
-          Personal Probe <span className="text-purple-300 font-normal normal-case">· up to 5</span>
+          {t('Personal Probe', '개인 탐구 변수')} <span className="text-purple-300 font-normal normal-case">· {t('up to 5', '최대 5개')}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -90,7 +93,13 @@ export default function ProbeSetup({ initial }: { initial: (string | null)[] }) 
               {slot.editing ? (
                 <div className="flex-1 space-y-1.5">
                   <Input
-                    placeholder={EXAMPLES[i]}
+                    placeholder={locale === 'ko' ? [
+                      '예: “잠들기 전 스크롤을 멈추기 얼마나 어려웠나?” (1–5)',
+                      '예: 내가 선택한 콘텐츠와 알고리즘 추천 콘텐츠의 비율',
+                      '예: 기상 후 처음 휴대폰을 확인하기까지 걸린 시간(분)',
+                      '예: 오늘의 미디어 사용에 얼마나 만족했나? (1–5)',
+                      '예: SNS 사용 후 기분 변화 (−2~+2)',
+                    ][i] : EXAMPLES[i]}
                     value={slot.input}
                     onChange={e => setInput(i, e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') save(i) }}
@@ -100,10 +109,10 @@ export default function ProbeSetup({ initial }: { initial: (string | null)[] }) 
                   {errors[i] && <p className="text-xs text-red-500">{errors[i]}</p>}
                   <div className="flex gap-2">
                     <Button size="sm" disabled={saving === i || !slot.input.trim()} onClick={() => save(i)}>
-                      {saving === i ? 'Saving…' : 'Save'}
+                      {saving === i ? t('Saving…', '저장 중…') : t('Save', '저장')}
                     </Button>
                     {slot.label && (
-                      <Button size="sm" variant="ghost" onClick={() => cancelEdit(i)}>Cancel</Button>
+                      <Button size="sm" variant="ghost" onClick={() => cancelEdit(i)}>{t('Cancel', '취소')}</Button>
                     )}
                   </div>
                 </div>
@@ -114,7 +123,7 @@ export default function ProbeSetup({ initial }: { initial: (string | null)[] }) 
                     onClick={() => openEdit(i)}
                     className="text-xs text-purple-400 hover:text-purple-600 shrink-0 pt-1.5"
                   >
-                    Edit
+                    {t('Edit', '수정')}
                   </button>
                 </div>
               ) : (
@@ -122,7 +131,7 @@ export default function ProbeSetup({ initial }: { initial: (string | null)[] }) 
                   onClick={() => openEdit(i)}
                   className="flex-1 text-left text-sm text-gray-400 hover:text-purple-500 pt-1.5 transition-colors"
                 >
-                  {isFirst ? '+ Add your first probe variable…' : `+ Add probe ${num}…`}
+                  {isFirst ? t('+ Add your first probe variable…', '+ 첫 번째 탐구 변수 추가…') : t(`+ Add probe ${num}…`, `+ 탐구 변수 ${num} 추가…`)}
                 </button>
               )}
             </div>
@@ -130,8 +139,10 @@ export default function ProbeSetup({ initial }: { initial: (string | null)[] }) 
         })}
 
         <p className="text-xs text-gray-400 pt-1">
-          Each probe is logged daily alongside your media diary.
-          Design one when you spot a pattern you want to track more closely.
+          {t(
+            'Each probe is logged daily alongside your media diary. Design one when you spot a pattern you want to track more closely.',
+            '각 탐구 변수는 미디어 다이어리와 함께 매일 기록됩니다. 더 자세히 살펴보고 싶은 패턴을 발견하면 만들어보세요.',
+          )}
         </p>
       </CardContent>
     </Card>
