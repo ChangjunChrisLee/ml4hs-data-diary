@@ -7,13 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import LanguageToggle from '@/components/language-toggle'
-import { useLanguage } from '@/components/language-provider'
-import { localizeError } from '@/lib/i18n'
 
 export default function LoginForm() {
   const router = useRouter()
-  const { locale, t } = useLanguage()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -38,16 +34,16 @@ export default function LoginForm() {
       })
       if (error) {
         setIsError(true)
-        setMessage(localizeError(locale, error.message))
+        setMessage(error.message)
       } else {
         setIsError(false)
-        setMessage(t('Check your email and click the confirmation link.', '이메일을 확인하고 인증 링크를 눌러주세요.'))
+        setMessage('Check your email and click the confirmation link.')
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
         setIsError(true)
-        setMessage(localizeError(locale, error.message))
+        setMessage(error.message)
       } else {
         router.push('/dashboard')
         router.refresh()
@@ -61,7 +57,7 @@ export default function LoginForm() {
     const normalizedEmail = email.trim()
     if (!normalizedEmail) {
       setIsError(true)
-      setMessage(t('Enter your email address first.', '먼저 이메일 주소를 입력해주세요.'))
+      setMessage('Enter your email address first.')
       return
     }
 
@@ -78,18 +74,15 @@ export default function LoginForm() {
     setResending(false)
     if (error) {
       setIsError(true)
-      setMessage(localizeError(locale, error.message))
+      setMessage(error.message)
     } else {
       setIsError(false)
-      setMessage(t('Confirmation email sent. Please check your inbox and spam folder.', '인증 이메일을 보냈습니다. 받은편지함과 스팸함을 확인해주세요.'))
+      setMessage('Confirmation email sent. Please check your inbox and spam folder.')
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 relative">
-      <div className="absolute right-4 top-4">
-        <LanguageToggle />
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-xl">ML4HS Data Diary</CardTitle>
@@ -100,22 +93,22 @@ export default function LoginForm() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
-              <Label htmlFor="email">{t('Email', '이메일')}</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder={t('Your school email', '학교 이메일')}
+                placeholder="Your school email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="password">{t('Password', '비밀번호')}</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder={t('6 characters or more', '6자 이상')}
+                placeholder="6 characters or more"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
@@ -129,7 +122,7 @@ export default function LoginForm() {
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? t('Processing...', '처리 중...') : isSignUp ? t('Sign Up', '회원가입') : t('Sign In', '로그인')}
+              {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Sign In'}
             </Button>
 
             <button
@@ -137,7 +130,7 @@ export default function LoginForm() {
               onClick={() => { setIsSignUp(!isSignUp); setMessage('') }}
               className="w-full text-sm text-gray-500 hover:text-gray-800 transition-colors"
             >
-              {isSignUp ? t('Already have an account? → Sign In', '이미 계정이 있나요? → 로그인') : t('New here? → Sign Up', '처음이신가요? → 회원가입')}
+              {isSignUp ? 'Already have an account? → Sign In' : 'New here? → Sign Up'}
             </button>
 
             <button
@@ -146,7 +139,7 @@ export default function LoginForm() {
               disabled={resending || loading}
               className="w-full text-sm text-blue-600 hover:text-blue-700 transition-colors disabled:opacity-50"
             >
-              {resending ? t('Sending confirmation email...', '인증 이메일 보내는 중...') : t('Resend confirmation email', '인증 이메일 다시 보내기')}
+              {resending ? 'Sending confirmation email...' : 'Resend confirmation email'}
             </button>
           </form>
         </CardContent>

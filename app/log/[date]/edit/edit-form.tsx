@@ -10,9 +10,6 @@ import { Button } from '@/components/ui/button'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import { useLanguage } from '@/components/language-provider'
-import LanguageToggle from '@/components/language-toggle'
-import { localizeError } from '@/lib/i18n'
 
 export type Log = {
   id: string
@@ -151,7 +148,6 @@ function ScaleRow({ label, value, onChange }: { label: string; value: number; on
 }
 
 function YesNo({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  const { t } = useLanguage()
   return (
     <div className="flex items-center justify-between">
       <span className="text-sm text-gray-700">{label}</span>
@@ -160,7 +156,7 @@ function YesNo({ label, value, onChange }: { label: string; value: string; onCha
           <button key={v} type="button" onClick={() => onChange(v)}
             className={`px-4 py-1.5 rounded-lg border text-sm transition-colors ${
               value === v ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400'
-            }`}>{v === 'yes' ? t('Yes', '예') : t('No', '아니요')}</button>
+            }`}>{v === 'yes' ? 'Yes' : 'No'}</button>
         ))}
       </div>
     </div>
@@ -188,45 +184,6 @@ function initBedtime(log: Log): Set<string> {
 
 export default function EditForm({ log, probeLabels }: { log: Log; probeLabels: (string | null)[] }) {
   const router = useRouter()
-  const { locale, t } = useLanguage()
-  const deviceLabel: Record<string, string> = locale === 'ko' ? {
-    smartphone: '스마트폰', tv_monitor: 'TV·모니터', tablet: '태블릿', pc_laptop: 'PC·노트북',
-    console: '게임기', ebook: '전자책 단말기', other: '기타',
-  } : {
-    smartphone: 'Smartphone', tv_monitor: 'TV / Monitor', tablet: 'Tablet', pc_laptop: 'PC / Laptop',
-    console: 'Game console', ebook: 'E-book reader', other: 'Other',
-  }
-  const genreLabel: Record<string, string> = {
-    'Drama / Film': '드라마 / 영화', 'Entertainment / Variety': '예능 / 버라이어티', Sports: '스포츠',
-    'News / Current Affairs': '뉴스 / 시사', 'Documentary / Nature': '다큐멘터리 / 자연', 'Animation / Anime': '애니메이션',
-    Other: '기타', 'Education / Tutorial': '교육 / 튜토리얼', 'Vlog / Daily Life': '브이로그 / 일상',
-    'Gaming / eSports': '게임 / e스포츠', 'Music Video': '뮤직비디오', 'Talk / Commentary': '토크 / 해설',
-    'Entertainment / Humor': '예능 / 유머', 'Dance / Music': '댄스 / 음악', 'Beauty / Fashion': '뷰티 / 패션',
-    'News / Info': '뉴스 / 정보', 'FPS / Action': 'FPS / 액션', 'RPG / Adventure': 'RPG / 어드벤처',
-    'MOBA / Strategy': 'MOBA / 전략', 'Sports / Racing': '스포츠 / 레이싱', 'Puzzle / Casual': '퍼즐 / 캐주얼',
-    'Simulation / Life Sim': '시뮬레이션 / 생활', 'Pop / K-pop': '팝 / K-pop', 'Hip-hop / R&B': '힙합 / R&B',
-    'Rock / Metal': '록 / 메탈', 'Classical / OST': '클래식 / OST', 'Dance / EDM': '댄스 / EDM',
-    'Indie / Folk': '인디 / 포크', Podcast: '팟캐스트', 'Other / Mixed': '기타 / 혼합',
-  }
-  const mediaLabel: Record<string, [string, string]> = {
-    media_tv_ott: ['TV / OTT', 'TV / OTT'], media_longform: ['Long-form Video', '롱폼 영상'],
-    media_shortform: ['Short-form', '숏폼'], media_sns: ['SNS', 'SNS'], media_messenger: ['Messenger', '메신저'],
-    media_game: ['Games', '게임'], media_music: ['Music', '음악'], media_news: ['News', '뉴스'],
-    media_webtoon: ['Webtoon / Web Novel', '웹툰 / 웹소설'], media_reading: ['Reading', '독서'], media_ai: ['AI Services', 'AI 서비스'],
-  }
-  const mediaExample: Record<string, string> = {
-    media_tv_ott: 'Netflix, Tving, Disney+, IPTV…', media_longform: 'YouTube, Twitch, V LIVE…',
-    media_shortform: 'TikTok, YouTube Shorts, Reels…', media_sns: 'Instagram, Facebook, X, Threads…',
-    media_messenger: '카카오톡, WhatsApp, Telegram…', media_game: '모바일, PC, 콘솔…',
-    media_music: 'Spotify, Apple Music, Melon…', media_news: '온라인 뉴스, 앱, 신문…',
-    media_webtoon: '네이버웹툰, 카카오페이지, 리디…', media_reading: '책, 전자책, PDF…',
-    media_ai: 'ChatGPT, Claude, Gemini, Copilot…',
-  }
-  const bedtimeLabel: Record<string, [string, string]> = {
-    tv_ott: ['TV/OTT', 'TV/OTT'], longform: ['Long-form', '롱폼'], shortform: ['Shorts', '숏폼'], sns: ['SNS', 'SNS'],
-    messenger: ['Messenger', '메신저'], game: ['Games', '게임'], music: ['Music', '음악'], news: ['News', '뉴스'],
-    webtoon: ['Webtoon', '웹툰'], reading: ['Reading', '독서'], ai: ['AI', 'AI'],
-  }
 
   const [sleepHours, setSleepHours] = useState(numStr(log.sleep_hours))
   const [studyHours, setStudyHours] = useState(numStr(log.study_hours))
@@ -333,16 +290,15 @@ export default function EditForm({ log, probeLabels }: { log: Log; probeLabels: 
       probe_value_5: probeLabels[4] ? n(probeValues[4]) : null,
     }).eq('id', log.id)
 
-    if (dbError) { setError(localizeError(locale, dbError.message, '변경사항을 저장하지 못했습니다. 다시 시도해주세요.')); setLoading(false) }
+    if (dbError) { setError(dbError.message); setLoading(false) }
     else { router.push('/dashboard'); router.refresh() }
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b px-4 sm:px-6 py-4 flex items-center gap-4">
+      <header className="bg-white border-b px-6 py-4 flex items-center gap-4">
         <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-700">←</button>
-        <div><h1 className="font-semibold">{t('Edit Log', '기록 수정')}</h1><p className="text-sm text-gray-500">{log.log_date}</p></div>
-        <div className="ml-auto"><LanguageToggle compact /></div>
+        <div><h1 className="font-semibold">Edit Log</h1><p className="text-sm text-gray-500">{log.log_date}</p></div>
       </header>
 
       <main className="max-w-lg mx-auto px-4 py-8">
@@ -350,28 +306,28 @@ export default function EditForm({ log, probeLabels }: { log: Log; probeLabels: 
 
           <Card>
             <CardHeader className="pb-1 pt-4">
-              <CardTitle className="text-xs text-gray-400 uppercase tracking-wide">{t('Daily Life', '일상 시간')}</CardTitle>
+              <CardTitle className="text-xs text-gray-400 uppercase tracking-wide">Life Time</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs">{t('Sleep (h)', '수면 (시간)')}</Label>
+                  <Label className="text-xs">Sleep (h)</Label>
                   <Input type="number" min="0" max="24" step="0.5" value={sleepHours} onChange={e => setSleepHours(e.target.value)} />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs">{t('Study (h)', '공부 (시간)')}</Label>
+                  <Label className="text-xs">Study (h)</Label>
                   <Input type="number" min="0" max="24" step="0.5" value={studyHours} onChange={e => setStudyHours(e.target.value)} />
                 </div>
               </div>
-              <YesNo label={t('Exercised today?', '오늘 운동했나요?')} value={exercise} onChange={setExercise} />
+              <YesNo label="Exercised today?" value={exercise} onChange={setExercise} />
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-1 pt-4">
               <CardTitle className="text-xs text-gray-400 uppercase tracking-wide">
-                {t('Media Breakdown (h)', '미디어 사용 (시간)')} ·{' '}
-                <span className="text-blue-600 normal-case font-semibold">{t('Total', '합계')} {mediaTotal.toFixed(1)} {t('h', '시간')}</span>
+                Media Breakdown (h) ·{' '}
+                <span className="text-blue-600 normal-case font-semibold">Total {mediaTotal.toFixed(1)} h</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -382,8 +338,8 @@ export default function EditForm({ log, probeLabels }: { log: Log; probeLabels: 
                     <div key={def.key} className="space-y-1.5">
                       <div className="flex items-center gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-700 leading-snug">{t(...mediaLabel[def.key])}</p>
-                          <p className="text-xs text-gray-400 leading-snug">{locale === 'ko' ? mediaExample[def.key] : def.examples}</p>
+                          <p className="text-sm text-gray-700 leading-snug">{def.label}</p>
+                          <p className="text-xs text-gray-400 leading-snug">{def.examples}</p>
                         </div>
                         <Input type="number" min="0" max="16" step="0.5"
                           value={hours[def.key]} onChange={e => setHour(def.key, e.target.value)}
@@ -399,7 +355,7 @@ export default function EditForm({ log, probeLabels }: { log: Log; probeLabels: 
                                   ? 'bg-blue-600 text-white border-blue-600'
                                   : 'bg-white text-gray-500 border-gray-200 hover:border-blue-400'
                               }`}>
-                              {deviceLabel[opt.value]}
+                              {opt.label}
                             </button>
                           ))}
                         </div>
@@ -410,11 +366,11 @@ export default function EditForm({ log, probeLabels }: { log: Log; probeLabels: 
                           onValueChange={v => setGenre(def.genreKey!, v as string)}
                         >
                           <SelectTrigger className="h-8 text-xs text-gray-500">
-                            <SelectValue placeholder={t('Main genre?', '주요 장르는?')} />
+                            <SelectValue placeholder="Main genre?" />
                           </SelectTrigger>
                           <SelectContent>
                             {def.genres.map(g => (
-                              <SelectItem key={g.value} value={g.value} className="text-xs">{locale === 'ko' ? genreLabel[g.label] ?? g.label : g.label}</SelectItem>
+                              <SelectItem key={g.value} value={g.value} className="text-xs">{g.label}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -425,15 +381,15 @@ export default function EditForm({ log, probeLabels }: { log: Log; probeLabels: 
               </div>
 
               <div className="space-y-2 pt-3 border-t">
-                <p className="text-xs text-gray-500 font-medium">{t('Used right before sleep?', '잠들기 직전에 사용했나요?')}</p>
+                <p className="text-xs text-gray-500 font-medium">Used right before sleep?</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {Object.keys(BEDTIME_LABELS).map(key => (
+                  {Object.entries(BEDTIME_LABELS).map(([key, label]) => (
                     <button key={key} type="button" onClick={() => toggleBedtime(key)}
                       className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
                         bedtime.has(key)
                           ? 'bg-indigo-600 text-white border-indigo-600'
                           : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300'
-                      }`}>{t(...bedtimeLabel[key])}</button>
+                      }`}>{label}</button>
                   ))}
                 </div>
               </div>
@@ -442,27 +398,27 @@ export default function EditForm({ log, probeLabels }: { log: Log; probeLabels: 
 
           <Card>
             <CardHeader className="pb-1 pt-4">
-              <CardTitle className="text-xs text-gray-400 uppercase tracking-wide">{t("Today's State (1 Low → 5 High)", '오늘의 상태 (1 낮음 → 5 높음)')}</CardTitle>
+              <CardTitle className="text-xs text-gray-400 uppercase tracking-wide">Today&apos;s State (1 Low → 5 High)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <ScaleRow label={t('Mood', '기분')}       value={mood}    onChange={setMood} />
-              <ScaleRow label={t('Stress', '스트레스')} value={stress}  onChange={setStress} />
-              <ScaleRow label={t('Fatigue', '피로')}    value={fatigue} onChange={setFatigue} />
-              <ScaleRow label={t('Focus', '집중')}      value={focus}   onChange={setFocus} />
+              <ScaleRow label="Mood"    value={mood}    onChange={setMood} />
+              <ScaleRow label="Stress"  value={stress}  onChange={setStress} />
+              <ScaleRow label="Fatigue" value={fatigue} onChange={setFatigue} />
+              <ScaleRow label="Focus"   value={focus}   onChange={setFocus} />
             </CardContent>
           </Card>
 
           <div className="space-y-1">
-            <Label>{t('Day Type', '하루 유형')}</Label>
+            <Label>Day Type</Label>
             <Select defaultValue={dayType} onValueChange={v => setDayType(v as string)}>
-              <SelectTrigger><SelectValue placeholder={t('Select…', '선택…')} /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="normal">{t('Normal day', '일반적인 날')}</SelectItem>
-                <SelectItem value="deadline">{t('Assignment deadline', '과제 마감일')}</SelectItem>
-                <SelectItem value="exam">{t('Exam', '시험일')}</SelectItem>
-                <SelectItem value="social">{t('Social activity', '모임이 있는 날')}</SelectItem>
-                <SelectItem value="parttime">{t('Part-time job', '아르바이트한 날')}</SelectItem>
-                <SelectItem value="other">{t('Other', '기타')}</SelectItem>
+                <SelectItem value="normal">Normal day</SelectItem>
+                <SelectItem value="deadline">Assignment deadline</SelectItem>
+                <SelectItem value="exam">Exam</SelectItem>
+                <SelectItem value="social">Social activity</SelectItem>
+                <SelectItem value="parttime">Part-time job</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -470,13 +426,13 @@ export default function EditForm({ log, probeLabels }: { log: Log; probeLabels: 
           {probeLabels.some(l => l) && (
             <Card className="border-purple-200 bg-purple-50/30">
               <CardHeader className="pb-1 pt-4">
-                <CardTitle className="text-xs text-purple-500 uppercase tracking-wide">{t('Personal Probe', '개인 탐구 변수')}</CardTitle>
+                <CardTitle className="text-xs text-purple-500 uppercase tracking-wide">Personal Probe</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {probeLabels.map((label, i) => label ? (
                   <div key={i} className="space-y-1">
                     <p className="text-sm text-gray-700">{i + 1}. {label}</p>
-                    <Input type="number" step="0.1" placeholder={t('Enter value', '값 입력')}
+                    <Input type="number" step="0.1" placeholder="Enter value"
                       value={probeValues[i]}
                       onChange={e => setProbeValues(prev => prev.map((v, idx) => idx === i ? e.target.value : v))} />
                   </div>
@@ -488,7 +444,7 @@ export default function EditForm({ log, probeLabels }: { log: Log; probeLabels: 
           {error && <p className="text-sm text-red-500">{error}</p>}
 
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
-            {loading ? t('Saving…', '저장 중…') : t('Save Changes', '변경사항 저장')}
+            {loading ? 'Saving…' : 'Save Changes'}
           </Button>
         </form>
       </main>

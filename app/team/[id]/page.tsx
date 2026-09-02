@@ -3,11 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import AppHeader from '@/components/app-header'
 import TeamDetail from './team-detail'
-import { getLocale } from '@/lib/i18n-server'
-import { pick } from '@/lib/i18n'
 
 export default async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const locale = await getLocale()
   const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -44,7 +41,7 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
     <div className="min-h-screen bg-gray-50">
       <AppHeader anonymousId={profile?.anonymous_id} isAdmin={profile?.is_admin ?? false} />
       <div className="max-w-2xl mx-auto px-4 pt-5 flex items-center gap-2 text-sm">
-        <Link href="/team" className="text-gray-400 hover:text-gray-700">← {pick(locale, 'Teams', '팀')}</Link>
+        <Link href="/team" className="text-gray-400 hover:text-gray-700">← Teams</Link>
         <span className="text-gray-300">/</span>
         <span className="font-medium text-gray-700">{team.name}</span>
       </div>

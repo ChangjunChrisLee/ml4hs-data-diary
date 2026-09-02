@@ -5,7 +5,6 @@ import {
   ResponsiveContainer, Legend, ReferenceLine, BarChart, Bar,
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useLanguage } from '@/components/language-provider'
 
 type Log = {
   log_date: string
@@ -48,12 +47,11 @@ const C = {
 }
 
 export default function DashboardCharts({ logs }: { logs: Log[] }) {
-  const { t } = useLanguage()
   if (logs.length < 2) {
     return (
       <Card>
         <CardContent className="py-10 text-center text-sm text-gray-400">
-          {t('Charts will appear after 2 or more days of logs.', '이틀 이상 기록하면 차트가 표시됩니다.')}
+          Charts will appear after 2 or more days of logs.
         </CardContent>
       </Card>
     )
@@ -61,30 +59,30 @@ export default function DashboardCharts({ logs }: { logs: Log[] }) {
 
   const data = [...logs].reverse().map(l => ({
     date:        shortDate(l.log_date),
-    [t('Sleep', '수면')]:       l.sleep_hours,
-    [t('Study', '공부')]:       l.study_hours,
-    [t('Media', '미디어')]:     totalMedia(l) || null,
-    [t('Mood', '기분')]:        l.mood,
-    [t('Stress', '스트레스')]:  l.stress,
-    [t('Fatigue', '피로')]:     l.fatigue,
-    [t('Focus', '집중')]:       l.focus,
+    Sleep:       l.sleep_hours,
+    Study:       l.study_hours,
+    Media:       totalMedia(l) || null,
+    Mood:        l.mood,
+    Stress:      l.stress,
+    Fatigue:     l.fatigue,
+    Focus:       l.focus,
     'TV/OTT':    l.media_tv_ott,
-    [t('Long-form', '롱폼')]: l.media_longform,
-    [t('Shorts', '숏폼')]:    l.media_shortform,
+    'Long-form': l.media_longform,
+    'Shorts':    l.media_shortform,
     'SNS':       l.media_sns,
-    [t('Messenger', '메신저')]: l.media_messenger,
-    [t('Games', '게임')]:       l.media_game,
-    [t('Music', '음악')]:       l.media_music,
-    [t('News', '뉴스')]:        l.media_news,
-    [t('Webtoon', '웹툰')]:     l.media_webtoon,
-    [t('Reading', '독서')]:     l.media_reading,
+    'Messenger': l.media_messenger,
+    'Games':     l.media_game,
+    'Music':     l.media_music,
+    'News':      l.media_news,
+    'Webtoon':   l.media_webtoon,
+    'Reading':   l.media_reading,
   }))
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">{t('Time Trends (hours)', '시간 추이 (시간)')}</CardTitle>
+          <CardTitle className="text-base">Time Trends (hours)</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={200}>
@@ -93,9 +91,9 @@ export default function DashboardCharts({ logs }: { logs: Log[] }) {
               <YAxis tick={{ fontSize: 11 }} domain={[0, 'auto']} />
               <Tooltip />
               <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
-              <Line type="monotone" dataKey={t('Sleep', '수면')} stroke={C.sleep} dot={false} strokeWidth={2} connectNulls />
-              <Line type="monotone" dataKey={t('Study', '공부')} stroke={C.study} dot={false} strokeWidth={2} connectNulls />
-              <Line type="monotone" dataKey={t('Media', '미디어')} stroke={C.media} dot={false} strokeWidth={2} connectNulls />
+              <Line type="monotone" dataKey="Sleep" stroke={C.sleep} dot={false} strokeWidth={2} connectNulls />
+              <Line type="monotone" dataKey="Study" stroke={C.study} dot={false} strokeWidth={2} connectNulls />
+              <Line type="monotone" dataKey="Media" stroke={C.media} dot={false} strokeWidth={2} connectNulls />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
@@ -103,7 +101,7 @@ export default function DashboardCharts({ logs }: { logs: Log[] }) {
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">{t('Media Breakdown (hours)', '미디어 사용 구성 (시간)')}</CardTitle>
+          <CardTitle className="text-base">Media Breakdown (hours)</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={220}>
@@ -113,15 +111,15 @@ export default function DashboardCharts({ logs }: { logs: Log[] }) {
               <Tooltip />
               <Legend iconType="circle" wrapperStyle={{ fontSize: 10 }} />
               <Bar dataKey="TV/OTT"    stackId="a" fill={C.tv_ott}    />
-              <Bar dataKey={t('Long-form', '롱폼')} stackId="a" fill={C.longform}   />
-              <Bar dataKey={t('Shorts', '숏폼')}    stackId="a" fill={C.shortform}  />
+              <Bar dataKey="Long-form" stackId="a" fill={C.longform}   />
+              <Bar dataKey="Shorts"    stackId="a" fill={C.shortform}  />
               <Bar dataKey="SNS"       stackId="a" fill={C.sns}        />
-              <Bar dataKey={t('Messenger', '메신저')} stackId="a" fill={C.messenger}  />
-              <Bar dataKey={t('Games', '게임')}       stackId="a" fill={C.game}       />
-              <Bar dataKey={t('Music', '음악')}       stackId="a" fill={C.music}      />
-              <Bar dataKey={t('News', '뉴스')}        stackId="a" fill={C.news}       />
-              <Bar dataKey={t('Webtoon', '웹툰')}     stackId="a" fill={C.webtoon}    />
-              <Bar dataKey={t('Reading', '독서')}     stackId="a" fill={C.reading}    />
+              <Bar dataKey="Messenger" stackId="a" fill={C.messenger}  />
+              <Bar dataKey="Games"     stackId="a" fill={C.game}       />
+              <Bar dataKey="Music"     stackId="a" fill={C.music}      />
+              <Bar dataKey="News"      stackId="a" fill={C.news}       />
+              <Bar dataKey="Webtoon"   stackId="a" fill={C.webtoon}    />
+              <Bar dataKey="Reading"   stackId="a" fill={C.reading}    />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -129,7 +127,7 @@ export default function DashboardCharts({ logs }: { logs: Log[] }) {
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">{t('State Trends (1–5)', '상태 추이 (1–5)')}</CardTitle>
+          <CardTitle className="text-base">State Trends (1–5)</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={200}>
@@ -139,10 +137,10 @@ export default function DashboardCharts({ logs }: { logs: Log[] }) {
               <ReferenceLine y={3} stroke="#e5e7eb" strokeDasharray="4 4" />
               <Tooltip />
               <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
-              <Line type="monotone" dataKey={t('Mood', '기분')}       stroke={C.mood}    dot={false} strokeWidth={2} connectNulls />
-              <Line type="monotone" dataKey={t('Stress', '스트레스')} stroke={C.stress}  dot={false} strokeWidth={2} connectNulls />
-              <Line type="monotone" dataKey={t('Fatigue', '피로')}    stroke={C.fatigue} dot={false} strokeWidth={2} connectNulls />
-              <Line type="monotone" dataKey={t('Focus', '집중')}      stroke={C.focus}   dot={false} strokeWidth={2} connectNulls />
+              <Line type="monotone" dataKey="Mood"    stroke={C.mood}    dot={false} strokeWidth={2} connectNulls />
+              <Line type="monotone" dataKey="Stress"  stroke={C.stress}  dot={false} strokeWidth={2} connectNulls />
+              <Line type="monotone" dataKey="Fatigue" stroke={C.fatigue} dot={false} strokeWidth={2} connectNulls />
+              <Line type="monotone" dataKey="Focus"   stroke={C.focus}   dot={false} strokeWidth={2} connectNulls />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>

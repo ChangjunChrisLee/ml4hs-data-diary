@@ -7,8 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useLanguage } from '@/components/language-provider'
-import { localizeError } from '@/lib/i18n'
 
 // ── Option lists ─────────────────────────────────────────────────────────────
 
@@ -244,17 +242,12 @@ type Profile = {
 export default function SurveyForm({ profile }: { profile: Profile | null }) {
   const router = useRouter()
   const p = profile ?? {}
-  const { locale } = useLanguage()
-  const ko = locale === 'ko'
+  const [language, setLanguage] = useState<'en' | 'ko'>('en')
+  const ko = language === 'ko'
 
   const serviceOpts = (opts: { value: string; label: string }[]) => opts.map(opt => ({
     ...opt,
-    label: ({
-      coupang_play: ko ? '쿠팡플레이' : 'Coupang Play',
-      genie: ko ? '지니' : 'Genie',
-      naver_blog: ko ? '네이버 블로그·카페' : 'Naver Blog / Cafe',
-      other: ko ? '기타' : 'Other',
-    } as Record<string, string>)[opt.value] ?? opt.label,
+    label: opt.value === 'other' ? (ko ? '기타' : 'Other') : opt.label,
   }))
   const deviceOpts = DEVICE_OPTS.map(opt => ({
     ...opt,
@@ -417,7 +410,7 @@ export default function SurveyForm({ profile }: { profile: Profile | null }) {
     }).eq('id', user.id)
 
     setLoading(false)
-    if (dbError) setError(localizeError(locale, dbError.message, '설문을 저장하지 못했습니다. 다시 시도해주세요.'))
+    if (dbError) setError(dbError.message)
     else setSaved(true)
   }
 
@@ -434,6 +427,14 @@ export default function SurveyForm({ profile }: { profile: Profile | null }) {
                 ? (ko ? '이전에 완료한 설문입니다. 수정 후 다시 저장할 수 있습니다.' : 'You have completed this survey. You can update and save it again.')
                 : (ko ? '한 번만 작성하면 됩니다. 나중에 언제든 수정 가능합니다.' : 'Complete this survey once. You can update it at any time.')}
             </p>
+          </div>
+          <div className="flex rounded-md border bg-white p-0.5 shrink-0" aria-label="Survey language">
+            {(['en', 'ko'] as const).map(value => (
+              <button key={value} type="button" onClick={() => setLanguage(value)}
+                className={`px-2.5 py-1 text-xs rounded transition-colors ${language === value ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-gray-800'}`}>
+                {value === 'en' ? 'English' : '한국어'}
+              </button>
+            ))}
           </div>
         </div>
       </div>
