@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useLanguage } from '@/components/language-provider'
 
 type Team   = { id: string; name: string; research_question: string | null; charter: string | null }
-type Member = { student_id: string; profiles: { anonymous_id: string } }
+type Member = { student_id: string; profiles: { anonymous_id: string } | null }
 type Post   = { id: string; content: string; created_at: string; author_id: string }
 
 export default function TeamDetail({ team, members, posts: initialPosts, userId, isMember }: {
@@ -23,7 +23,7 @@ export default function TeamDetail({ team, members, posts: initialPosts, userId,
   const { locale, t } = useLanguage()
 
   function anonName(authorId: string) {
-    return members.find(m => m.student_id === authorId)?.profiles.anonymous_id ?? t('Former member', '이전 멤버')
+    return members.find(m => m.student_id === authorId)?.profiles?.anonymous_id ?? t('Former member', '이전 멤버')
   }
 
   const [charter, setCharter]         = useState(team.charter ?? '')
@@ -94,7 +94,7 @@ export default function TeamDetail({ team, members, posts: initialPosts, userId,
                     ? 'bg-blue-100 text-blue-700 font-medium'
                     : 'bg-gray-100 text-gray-600'
                 }`}>
-                {m.profiles.anonymous_id}
+                {m.profiles?.anonymous_id ?? t('Former member', '이전 멤버')}
               </span>
             ))}
           </div>
