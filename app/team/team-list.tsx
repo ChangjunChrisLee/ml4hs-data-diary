@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useLanguage } from '@/components/language-provider'
+import { localizeError } from '@/lib/i18n'
 
 type Member = {
   student_id: string
-  profiles: { anonymous_id: string }
+  profiles: { anonymous_id: string } | null
 }
 
 export type Team = {
@@ -22,6 +24,7 @@ export default function TeamList({ teams, userId, myTeamId }: {
   myTeamId: string | null
 }) {
   const router = useRouter()
+  const { locale, t } = useLanguage()
   const [newName, setNewName] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [loading, setLoading] = useState<string | null>(null)
@@ -39,13 +42,13 @@ export default function TeamList({ teams, userId, myTeamId }: {
       .select()
       .single()
 
-    if (e1 || !team) { setError(e1?.message ?? 'Error'); setLoading(null); return }
+    if (e1 || !team) { setError(e1 ? localizeError(locale, e1.message, '팀을 만들지 못했습니다. 다시 시도해주세요.') : t('An error occurred.', '오류가 발생했습니다.')); setLoading(null); return }
 
     const { error: e2 } = await supabase
       .from('team_members')
       .insert({ team_id: team.id, student_id: userId })
 
-    if (e2) { setError(e2.message); setLoading(null); return }
+    if (e2) { setError(localizeError(locale, e2.message, '팀에 참여하지 못했습니다. 다시 시도해주세요.')); setLoading(null); return }
 
     router.push(`/team/${team.id}`)
     router.refresh()
@@ -60,7 +63,7 @@ export default function TeamList({ teams, userId, myTeamId }: {
       .from('team_members')
       .insert({ team_id: teamId, student_id: userId })
 
-    if (error) { setError(error.message); setLoading(null); return }
+    if (error) { setError(localizeError(locale, error.message, '팀에 참여하지 못했습니다. 다시 시도해주세요.')); setLoading(null); return }
 
     router.push(`/team/${teamId}`)
     router.refresh()
@@ -69,13 +72,13 @@ export default function TeamList({ teams, userId, myTeamId }: {
   return (
     <main className="max-w-2xl mx-auto px-4 py-8 space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Teams</h2>
+        <h2 className="text-lg font-semibold">{t('Teams', '팀')}</h2>
         {!myTeamId && (
           <button
             onClick={() => setShowCreate(v => !v)}
             className="text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
-            + Create Team
+            + {t('Create Team', '팀 만들기')}
           </button>
         )}
       </div>
@@ -84,7 +87,7 @@ export default function TeamList({ teams, userId, myTeamId }: {
         <div className="bg-white border rounded-lg p-4 space-y-3">
           <input
             type="text"
-            placeholder="Team name (e.g. Sleep & Focus)"
+            placeholder={t('Team name (e.g. Sleep & Focus)', '팀 이름 (예: 수면과 집중)')}
             value={newName}
             onChange={e => setNewName(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && createTeam()}
@@ -97,13 +100,13 @@ export default function TeamList({ teams, userId, myTeamId }: {
               disabled={loading === 'create' || !newName.trim()}
               className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm disabled:opacity-50 hover:bg-blue-700"
             >
-              {loading === 'create' ? 'Creating...' : 'Create & Join'}
+              {loading === 'create' ? t('Creating...', '만드는 중...') : t('Create & Join', '만들고 참여하기')}
             </button>
             <button
               onClick={() => { setShowCreate(false); setNewName('') }}
               className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700"
             >
-              Cancel
+              {t('Cancel', '취소')}
             </button>
           </div>
         </div>
@@ -113,7 +116,7 @@ export default function TeamList({ teams, userId, myTeamId }: {
 
       {teams.length === 0 ? (
         <p className="text-center text-gray-400 py-16 text-sm">
-          No teams yet. Be the first to create one!
+          {t('No teams yet. Be the first to create one!', '아직 팀이 없습니다. 첫 번째 팀을 만들어보세요!')}
         </p>
       ) : (
         <div className="space-y-3">
@@ -121,6 +124,10 @@ export default function TeamList({ teams, userId, myTeamId }: {
             const count = team.team_members.length
             const isMine = team.id === myTeamId
             const isFull = count >= 5
+            const memberIds = team.team_members
+              .map(member => member.profiles?.anonymous_id)
+              .filter((id): id is string => Boolean(id))
+              .join(', ')
 
             return (
               <div key={team.id}
@@ -133,17 +140,17 @@ export default function TeamList({ teams, userId, myTeamId }: {
                     <span className="font-medium text-sm">{team.name}</span>
                     {isMine && (
                       <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full">
-                        My Team
+                        {t('My Team', '내 팀')}
                       </span>
                     )}
                     {isFull && !isMine && (
                       <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">
-                        Full
+                        {t('Full', '정원 마감')}
                       </span>
                     )}
                   </div>
                   <p className="text-xs text-gray-400">
-                    {count}/5 · {team.team_members.map(m => m.profiles.anonymous_id).join(', ')}
+                    {count}/5{memberIds ? ` · ${memberIds}` : ''}
                   </p>
                   {team.research_question && (
                     <p className="text-xs text-gray-500 italic truncate">{team.research_question}</p>
@@ -154,7 +161,7 @@ export default function TeamList({ teams, userId, myTeamId }: {
                   {isMine ? (
                     <a href={`/team/${team.id}`}
                       className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                      Open →
+                      {t('Open', '열기')} →
                     </a>
                   ) : !myTeamId && !isFull ? (
                     <button
@@ -162,7 +169,7 @@ export default function TeamList({ teams, userId, myTeamId }: {
                       disabled={loading === team.id}
                       className="text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50"
                     >
-                      {loading === team.id ? 'Joining...' : 'Join'}
+                      {loading === team.id ? t('Joining...', '참여 중...') : t('Join', '참여하기')}
                     </button>
                   ) : null}
                 </div>
