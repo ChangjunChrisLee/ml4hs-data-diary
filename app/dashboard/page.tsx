@@ -42,6 +42,11 @@ export default async function DashboardPage() {
     .order('log_date', { ascending: false })
     .limit(14)
 
+  const { count: totalLogCount } = await supabase
+    .from('daily_logs')
+    .select('*', { count: 'exact', head: true })
+    .eq('student_id', user.id)
+
   const todayLog = logs?.find(l => l.log_date === today)
   const logCount = logs?.length ?? 0
 
@@ -101,6 +106,8 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-2 gap-4">
           <Card>
             <CardContent className="pt-5">
+              <p className="text-2xl font-bold">{totalLogCount ?? logCount}</p>
+              <p className="text-sm text-gray-500">Days logged</p>
               <p className="text-2xl font-bold">{logCount}</p>
               <p className="text-sm text-gray-500">{t('Days logged', '기록한 날')}</p>
             </CardContent>
@@ -133,6 +140,18 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-base">Recent Logs</CardTitle>
+                <p className="text-xs text-gray-400 mt-1">Showing the latest 14 logs.</p>
+              </div>
+              <div className="flex gap-2">
+                <Link href="/logs">
+                  <Button variant="outline" size="sm">View All</Button>
+                </Link>
+                <Link href="/log/new">
+                  <Button variant="outline" size="sm">+ New Log</Button>
+                </Link>
+              </div>
               <CardTitle className="text-base">{t('Recent Logs', '최근 기록')}</CardTitle>
               <Link href="/log/new">
                 <Button variant="outline" size="sm">+ {t('New Log', '새 기록')}</Button>
