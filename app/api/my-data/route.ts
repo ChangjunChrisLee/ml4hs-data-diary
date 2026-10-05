@@ -13,7 +13,6 @@ const LOG_FIELDS = [
   'bedtime_game', 'bedtime_music', 'bedtime_news', 'bedtime_webtoon', 'bedtime_reading', 'bedtime_ai',
   'mood', 'stress', 'fatigue', 'focus', 'day_type',
   'probe_value_1', 'probe_value_2', 'probe_value_3', 'probe_value_4', 'probe_value_5',
-  'notes',
 ] as const
 
 const MEDIA_FIELDS = [
@@ -76,7 +75,6 @@ export async function GET() {
     'bedtime_game', 'bedtime_music', 'bedtime_news', 'bedtime_webtoon', 'bedtime_reading', 'bedtime_ai',
     'mood', 'stress', 'fatigue', 'focus', 'day_type',
     'probe_value_1', 'probe_value_2', 'probe_value_3', 'probe_value_4', 'probe_value_5',
-    'notes',
   ]
 
   const booleanFields = new Set([
