@@ -107,8 +107,6 @@ export default async function DashboardPage() {
           <Card>
             <CardContent className="pt-5">
               <p className="text-2xl font-bold">{totalLogCount ?? logCount}</p>
-              <p className="text-sm text-gray-500">Days logged</p>
-              <p className="text-2xl font-bold">{logCount}</p>
               <p className="text-sm text-gray-500">{t('Days logged', '기록한 날')}</p>
             </CardContent>
           </Card>
@@ -139,23 +137,21 @@ export default async function DashboardPage() {
         {/* Recent logs table */}
         <Card>
           <CardHeader className="pb-2">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-3">
               <div>
-                <CardTitle className="text-base">Recent Logs</CardTitle>
-                <p className="text-xs text-gray-400 mt-1">Showing the latest 14 logs.</p>
+                <CardTitle className="text-base">{t('Recent Logs', '최근 기록')}</CardTitle>
+                <p className="text-xs text-gray-400 mt-1">
+                  {t('Showing the latest 14 logs.', '최근 14개 기록만 표시됩니다.')}
+                </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap justify-end gap-2">
                 <Link href="/logs">
-                  <Button variant="outline" size="sm">View All</Button>
+                  <Button variant="outline" size="sm">{t('View All', '전체 보기')}</Button>
                 </Link>
                 <Link href="/log/new">
-                  <Button variant="outline" size="sm">+ New Log</Button>
+                  <Button variant="outline" size="sm">+ {t('New Log', '새 기록')}</Button>
                 </Link>
               </div>
-              <CardTitle className="text-base">{t('Recent Logs', '최근 기록')}</CardTitle>
-              <Link href="/log/new">
-                <Button variant="outline" size="sm">+ {t('New Log', '새 기록')}</Button>
-              </Link>
             </div>
           </CardHeader>
           <CardContent>
